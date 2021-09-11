@@ -1,0 +1,92 @@
+20210911-6장 정렬 개인공부
+
+정렬 : 데이터를 특정한 기준에따라서 순서대로 나열하는것
+프로그램 작성할 때 가장 많이 활용되는 알고리즘임
+이진탐색의 전처리과정이기도 함
+선택, 삽입, 퀵, 계수 정렬 등이 있다.
+
+1. 선택정렬 : 가장 작은 데이터를 선택해서 맨 앞에있는 데이터와 자리바꾸기.
+
+for i in range(len(array)):
+	#가장 작은 원소의 인덱스 맨 처음의경우 제일 앞에 있는 숫자가 됨.
+	min_index = i
+	for j in range(i+1, len(array))#작은거 다음거부터 끝까지 범위에서 제일작은 숫자를 찾음
+		if array[min_index] > array[j]: #더 작은 숫자 발견
+			min_index = j
+	#제일 작은걸 찾고 난 후 맨 앞에있는 숫자와 자리 바꿔주기
+	array[i], array[min_index] = array[min_index], array[i] #서로 자리 바꿔주는 방법
+	#이경우 이외에 temp를 사용하여 자리 바꾸기 가능
+	temp = array[i]
+	array[i] = array[min_index]
+	array[min_index] = temp 
+2중 포문이니까 N^2복잡도 데이터가 만개가 넘어가면 급속도로 느려진다.
+
+
+2. 삽입정렬 : 두번째 부터 정렬시작. 앞에가 정렬되어있다고 생각하고 크기비교한 후(오른쪽->왼쪽으로) 맞는 자리에 끼워넣기 한다.
+	자기보다 작은 데이터를 만났을때 종료하고 삽입시킴 (밀어내기)
+
+for i in range(1,len(array))#두번째 자리부터 하니까 1부터.
+	for j in range(i,0,-1)#자기 앞에있는거들이랑 비교해서 들어갈 자리 찾음.
+	if array[j]<array[j-1]:#자기보다 앞에있는애가 더큼.< 사이에 끼어들어가야 함.
+		array[j], array[j-1] = array[j-1], array[j]
+	else:# 자기보다 앞에있는애가 더 작음<<자리를 잘 잡은것
+		break
+
+2중포문이니까 N^2복잡도. best의 경우 N의 복잡도까지 가능
+거의 정렬이 되어있는 경우 유리하다!!!!!
+
+
+3. 퀵정렬 : 가장 많이 사용되는 알고리즘. (병합정렬도 매우빠름) 리스트의 맨 처음 데이터를 피벗으로 설정하고
+	리스트 양쪽 끝에서, 왼쪽에서는 피벗보다 큰 숫자 찾고 오른쪽에서는 피벗보다 작은 숫자를 찾음
+	그리고 그 둘을 자리 바꿈 함.<<반복함
+	왼쪽 오른쪽에서 각각 찾다가 서로 자리가 꼬이면(엇갈리면) 피벗보다 작은 데이터와 자리바꾸기
+	그리고 피벗 기준 양쪽도 퀵정렬 해주면 됨.<<재귀
+
+def quick_sort(array, start, end):
+	if start >= end: return #어레이의 원소가 1개인 경우
+	pivot=start#어레이의 첫번째 원소. 맨 앞 데이터
+	left = start+1
+	right=end
+	
+	while left <= right #서로 자리가 꼬이지 않을때까지
+		while left <= end and array[left] <= array[pivot] #피벗보다 큰거 찾기
+			left + =1#피벗보다 작으면 한칸 오른쪽으로 이동
+		while right > start and array[right] >= array[pivot]#피벗보다 작은거 찾기
+			right -=1#피벗보다 크면 한칸 왼쪽으로 이동
+
+		if left > right : #둘이 자리 조정하다가 자리가 꼬이면 right가 작은거 
+				#찾은거니까 pivot하고 자리바꿔줌
+			array[right], array[pivot] = array[pivot], array[right]
+		else:#자리가 꼬이지 않은경우 서로 자리바꾸기
+			array[right], array[left] = array[left], array[right]
+	#한차례 퀵소트 하고 피벗 기준으로 양쪽 각각 재귀적으로 퀵소트 진행
+	quick_sort(array, start, right-1)#right와 pivot 각 자리 원소만 바꾼거지 인덱스는 안변함
+	quick_sort(array, right+1, end)
+
+quick_sort(array,0,len(array)-1)
+
+시간복잡도 평균 NlogN. 최악의 경우 N^2<<이미 데이터가 정렬되어있는경우.
+이미 정렬되어있을때는 삽입정렬 써주자.
+
+
+4.계수정렬 : 정수일때, 최대 최소 차이가 크지 않을때 유리. 비교기반의 알고리즘이 아님
+	어레이를 데이터 폭만큼 전부 설정하고 개수를 세줌. 그리고 차례대로 출력함.
+
+count = [0]* (max(array)-min(array)+1)
+
+for i in range(len(array)):
+	#해당 데이터값을 갖는 인덱스 값을 증가시킴
+	count[array[i]] +=1
+
+for i in range(len(count)):
+	for j in range(count[i]):
+		print(i, end=' ')#횟수만큼 출력반복
+
+시간복잡도 N+K(K = 최대값의 크기). 범위만 한정되어있다면 굉장히 빠른 방법
+공간복잡도도 N+K
+
+5.라이브러리 sorted(arr), arr.sort()
+병합정렬 베이스. NlogN
+
+별도의 요구가 없는 경우 정렬 라이브러리 사용해도 되고 
+데이터의 범위가 한정되어있는 경우 더 빠르게 정렬할 수 있는 방법 생각(계수정렬)
